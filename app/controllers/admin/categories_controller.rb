@@ -13,6 +13,14 @@ class Admin::CategoriesController < Admin::BaseController
     end
   end
 
+  def edit
+    respond_to do |format|
+      format.html { new_or_edit }
+#      format.js { new_or_edit   }
+    end
+  end
+  
+
   def destroy
     @record = Category.find(params[:id])
     return(render 'admin/shared/destroy') unless request.post?
