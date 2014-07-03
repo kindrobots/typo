@@ -147,9 +147,9 @@ class Admin::ContentController < Admin::BaseController
     #Comments on each of the two original articles need to all carry over and point to the new, merged article.
     mw_comments = mw_article.comments
     mw_comments.each { |c|; c.article = @article }
-    @article.save!
+    @article.clear_association_cache
     mw_article.clear_association_cache
-    
+    @article.save!    
     mw_article.destroy
 
     #When articles are merged, the merged article should have one author (either one of the authors of the original article).  
