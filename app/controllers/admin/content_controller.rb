@@ -148,6 +148,7 @@ class Admin::ContentController < Admin::BaseController
     mw_comments = mw_article.comments
     mw_comments.each { |c|; c.article = @article }
     @article.save!
+    mw_article.clear_association_cache
     
     mw_article.destroy
 
