@@ -43,6 +43,66 @@ Given /^the blog is set up$/ do
                 :state => 'active'})
 end
 
+And /^Test articles are created$/ do
+  a1 = Article.create!(
+    :allow_comments => true, 
+    :allow_pings => true, 
+    :author => "A1", 
+    :body => "TEXT1", 
+    :guid => "2bf3e2ca-ed7b-4562-8a4a-8ce8438822c8", 
+    :id => 3, 
+#    :permalink => "hello-world", 
+    :post_type => "read", 
+    :published => true, 
+    :published_at => "2012-06-09 21:51:55 UTC", 
+    :settings => {"password"=>""}, 
+    :state => "published", 
+    :text_filter_id => 5, 
+    :title => "Testtitle1", 
+    :type => "Article", 
+#    :user_id => 1  # This will probably break it
+    )
+
+  a2 = Article.create!(
+    :allow_comments => true, 
+    :allow_pings => true, 
+    :author => "A2", 
+    :body => "TEXT2", 
+    :guid => "3bf3e2ca-ed7b-4562-8a4a-8ce8438822c8", 
+    :id => 4, 
+#    :permalink => "hello-world", 
+    :post_type => "read", 
+    :published => true, 
+    :published_at => "2012-06-09 21:51:55 UTC", 
+    :settings => {"password"=>""}, 
+    :state => "published", 
+    :text_filter_id => 5, 
+    :title => "Testtitle2", 
+    :type => "Article", 
+#    :user_id => 1  # This will probably break it
+    )
+
+  Comment.new(:author => 'CA1',
+            :article => a1,
+            :body => 'COMMENT1',
+            #:ip => '1.2.3.4'
+          )
+  Comment.new(:author => 'CA2',
+            :article => a1,
+            :body => 'COMMENT2',
+            #:ip => '1.2.3.4'
+          )
+
+  Comment.new(:author => 'CA3',
+            :article => a2,
+            :body => 'COMMENT3',
+            #:ip => '1.2.3.4'
+          )
+  a1.save!
+  a2.save!
+end
+  
+
 And /^I am logged into the admin panel$/ do
   visit '/accounts/login'
   fill_in 'user_login', :with => 'admin'

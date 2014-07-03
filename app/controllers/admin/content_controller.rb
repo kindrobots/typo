@@ -113,6 +113,56 @@ class Admin::ContentController < Admin::BaseController
     render :text => nil
   end
 
+  def merge
+    id = params[:id]
+    id = params[:article][:id] if params[:article] && params[:article][:id]    
+ 
+    mw_id = params[:merge_with]
+
+    @article = Article.find(id)    
+    @images = Resource.images_by_created_at.page(params[:page]).per(10)
+    @resources = Resource.without_images_by_filename
+    @macros = TextFilter.macro_filters
+  
+
+    if !mw_id 
+      flash[:error] = _("Cannot merge articles: target article id is not set")
+      flash.keep
+      redirect_to :action => "edit", :id => id
+      return
+    end    
+
+    mw_article = Article.find_by_id(mw_id)    
+    if !mw_article 
+      flash[:error] = _("Cannot merge articles: article with id #{params[:merge_with]} doesn't exist")
+      flash.keep
+      redirect_to :action => "edit", :id => id
+      return
+    end
+
+
+    #When articles are merged, the merged article should contain the text of both previous articles.
+    @article.body += mw_article.body
+
+    #Comments on each of the two original articles need to all carry over and point to the new, merged article.
+    mw_comments = mw_article.comments
+    mw_comments.each { |c|; c.article = @article }
+    @article.save!
+    
+    mw_article.destroy
+
+    #When articles are merged, the merged article should have one author (either one of the authors of the original article).  
+    #
+
+    #The title of the new article should be the title from either one of the merged articles.
+    #
+
+    flash[:notice] = _( "Successfully merged!")
+    flash.keep
+    redirect_to :action => "edit", :id => id
+  end
+
+
   protected
 
   def get_fresh_or_existing_draft_for_article
@@ -142,7 +192,13 @@ class Admin::ContentController < Admin::BaseController
   def new_or_edit
     id = params[:id]
     id = params[:article][:id] if params[:article] && params[:article][:id]
-    @article = Article.get_or_build_article(id)
+
+    @article = Article.find_by_id(id)
+    @show_merge = (current_user.admin?  and  !!@article)
+    if !@article
+      @article = Article.get_or_build_article(id)
+    end
+#    Article.get_or_build_article(id)
     @article.text_filter = current_user.text_filter if current_user.simple_editor?
 
     @post_types = PostType.find(:all)
@@ -240,4 +296,5 @@ class Admin::ContentController < Admin::BaseController
   def setup_resources
     @resources = Resource.by_created_at
   end
+
 end
